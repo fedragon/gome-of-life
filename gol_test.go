@@ -145,21 +145,33 @@ func Test_neighbours(t *testing.T) {
 		args args
 		want []coord
 	}{
-		{"returns 9 neighbours when cell sits in the center of a 3x3 board",
+		{"returns 8 neighbours when cell is in the center of a 3x3 board",
 			args{coord{1, 1}, 3, 3},
 			[]coord{coord{0, 0}, coord{1, 0}, coord{2, 0}, coord{2, 1}, coord{2, 2}, coord{1, 2}, coord{0, 2}, coord{0, 1}}},
-		{"returns 6 neighbours when cell sits at the top middle of a 3x3 board",
+		{"returns 5 neighbours when cell is in the middle of the top row of a 3x3 board",
 			args{coord{0, 1}, 3, 3},
 			[]coord{coord{0, 0}, coord{1, 0}, coord{1, 1}, coord{1, 2}, coord{0, 2}}},
-		{"returns 6 neighbours when cell sits at the bottom middle of a 3x3 board",
+		{"returns 5 neighbours when cell is in the middle of the bottom row of a 3x3 board",
 			args{coord{2, 1}, 3, 3},
 			[]coord{coord{1, 0}, coord{2, 0}, coord{2, 2}, coord{1, 2}, coord{1, 1}}},
-		{"returns 6 neighbours when cell sits on the left middle of a 3x3 board",
+		{"returns 5 neighbours when cell is on the left of the middle row of a 3x3 board",
 			args{coord{1, 0}, 3, 3},
 			[]coord{coord{2, 0}, coord{2, 1}, coord{1, 1}, coord{0, 1}, coord{0, 0}}},
-		{"returns 6 neighbours when cell sits on the right middle of a 3x3 board",
+		{"returns 5 neighbours when cell is on the right of the middle row of a 3x3 board",
 			args{coord{1, 2}, 3, 3},
 			[]coord{coord{0, 1}, coord{1, 1}, coord{2, 1}, coord{2, 2}, coord{0, 2}}},
+		{"returns 3 neighbours when cell is on the left of the top row of a 3x3 board",
+			args{coord{0, 0}, 3, 3},
+			[]coord{coord{1, 0}, coord{1, 1}, coord{0, 1}}},
+		{"returns 3 neighbours when cell is on the right of the top row of a 3x3 board",
+			args{coord{0, 2}, 3, 3},
+			[]coord{coord{0, 1}, coord{1, 1}, coord{1, 2}}},
+		{"returns 3 neighbours when cell is on the left of the bottom row of a 3x3 board",
+			args{coord{2, 0}, 3, 3},
+			[]coord{coord{2, 1}, coord{1, 1}, coord{1, 0}}},
+		{"returns 3 neighbours when cell is on the left of the bottom row of a 3x3 board",
+			args{coord{2, 2}, 3, 3},
+			[]coord{coord{1, 1}, coord{2, 1}, coord{1, 2}}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

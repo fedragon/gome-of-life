@@ -1,18 +1,19 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/fedragon/gome-of-life/core"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 const (
-	screenWidth  = 160
-	screenHeight = 120
+	screenWidth  = 320
+	screenHeight = 240
 )
 
 func init() {
@@ -26,10 +27,8 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
-	g.generation++
 	g.board.Evolve()
-
-	ebiten.SetWindowTitle(fmt.Sprintf("Game of Life ~ gen %d", g.generation))
+	g.generation++
 
 	return nil
 }
@@ -42,16 +41,20 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.board.TakeSnapshot(g.pixels)
 
 	screen.WritePixels(g.pixels)
+
+	ebitenutil.DebugPrint(screen, strconv.Itoa(g.generation))
 }
 
-func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+func (g *Game) Layout(_, _ int) (int, int) {
 	return screenWidth, screenHeight
 }
 
 func main() {
-	game := &Game{board: core.NewBoard(screenWidth, screenHeight, screenWidth*screenHeight/10)}
+	game := &Game{
+		board:      core.NewBoard(screenWidth, screenHeight, screenWidth*screenHeight/25),
+		generation: 1,
+	}
 
-	ebiten.SetTPS(60)
 	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
 	ebiten.SetWindowTitle("Game of Life")
 

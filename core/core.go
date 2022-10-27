@@ -11,59 +11,58 @@ type Board struct {
 func NewBoard(rows, cols, maxAlive int) *Board {
 	b := make([][]bool, rows)
 
-	for i := 0; i < rows; i++ {
-		b[i] = make([]bool, cols)
+	for x := 0; x < rows; x++ {
+		b[x] = make([]bool, cols)
 	}
 
 	for k := 0; k < maxAlive; k++ {
-		i := rand.Intn(rows)
-		j := rand.Intn(cols)
+		x := rand.Intn(rows)
+		y := rand.Intn(cols)
 
-		b[i][j] = true
+		b[x][y] = true
 	}
 
 	return &Board{state: b}
 }
 
 func (b *Board) Evolve() {
-	for i := 0; i < len(b.state); i++ {
-		for j := 0; j < len(b.state[i]); j++ {
-			b.evolveCell(coord{i, j})
+	for x := 0; x < len(b.state); x++ {
+		for y := 0; y < len(b.state[x]); y++ {
+			b.evolveCell(coord{x, y})
 		}
 	}
 }
 
 func (b *Board) evolveCell(c coord) {
-	i, j := c.x, c.y
+	x, y := c.x, c.y
 	aliveNeighbours := 0
-	for _, n := range neighbours(c, len(b.state), len(b.state[i])) {
+	for _, n := range neighbours(c, len(b.state), len(b.state[x])) {
 		if b.state[n.x][n.y] {
 			aliveNeighbours++
 		}
 	}
 
-	if b.state[i][j] {
-		if aliveNeighbours < 2 || aliveNeighbours > 3 {
-			b.state[i][j] = false
-		} else {
-			b.state[i][j] = true
-		}
-	} else if aliveNeighbours == 3 {
-		b.state[i][j] = true
+	switch {
+	case b.state[x][y] && aliveNeighbours == 2:
+		b.state[x][y] = true
+	case aliveNeighbours == 3:
+		b.state[x][y] = true
+	default:
+		b.state[x][y] = false
 	}
 }
 
 // TakeSnapshot creates a snapshot of the board state on a pixel byte array where each pixel is represented by a 4-bytes RGBA point.
 func (b *Board) TakeSnapshot(pixels []byte) {
-	for i := 0; i < len(b.state); i++ {
-		for j := 0; j < len(b.state[i]); j++ {
+	for x := 0; x < len(b.state); x++ {
+		for y := 0; y < len(b.state[x]); y++ {
 			var v byte = 0
-			if b.state[i][j] {
+			if b.state[x][y] {
 				v = 0xff
 			}
 
 			for k := 0; k < 3; k++ {
-				pixels[4*i*j+k] = v
+				pixels[4*x*y+k] = v
 			}
 		}
 	}

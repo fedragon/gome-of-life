@@ -19,11 +19,6 @@ func empty(rows, cols int) *Board {
 	return &Board{grid: grid, rows: rows, cols: cols}
 }
 
-func (b *Board) init(grid [][]bool) *Board {
-	b.grid = grid
-	return b
-}
-
 func NewBoard(width, height, maxAlive int) *Board {
 	b := empty(height, width)
 

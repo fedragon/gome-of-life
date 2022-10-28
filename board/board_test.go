@@ -96,14 +96,14 @@ func Test_evolveCell(t *testing.T) {
 		{
 			name: "any living cell with no alive neighbours dies, as if by underpopulation",
 			args: args{
-				b: empty(3, 3).init([][]bool{
+				b: from([][]bool{
 					{F, F, F},
 					{F, T, F},
 					{F, F, F},
 				}),
 				c: cell{1, 1},
 			},
-			want: empty(3, 3).init([][]bool{
+			want: from([][]bool{
 				{F, F, F},
 				{F, F, F},
 				{F, F, F},
@@ -112,14 +112,14 @@ func Test_evolveCell(t *testing.T) {
 		{
 			name: "any living cell with one alive neighbour dies, as if by underpopulation",
 			args: args{
-				b: empty(3, 3).init([][]bool{
+				b: from([][]bool{
 					{F, F, T},
 					{F, T, F},
 					{F, F, F},
 				}),
 				c: cell{1, 1},
 			},
-			want: empty(3, 3).init([][]bool{
+			want: from([][]bool{
 				{F, F, T},
 				{F, F, F},
 				{F, F, F},
@@ -128,14 +128,14 @@ func Test_evolveCell(t *testing.T) {
 		{
 			name: "any living cell with two alive neighbours lives on to the next generation",
 			args: args{
-				b: empty(3, 3).init([][]bool{
+				b: from([][]bool{
 					{F, T, F},
 					{F, T, F},
 					{T, F, F},
 				}),
 				c: cell{1, 1},
 			},
-			want: empty(3, 3).init([][]bool{
+			want: from([][]bool{
 				{F, T, F},
 				{F, T, F},
 				{T, F, F},
@@ -144,14 +144,14 @@ func Test_evolveCell(t *testing.T) {
 		{
 			name: "any living cell with three alive neighbours lives on to the next generation",
 			args: args{
-				b: empty(3, 3).init([][]bool{
+				b: from([][]bool{
 					{F, T, F},
 					{F, T, T},
 					{T, F, F},
 				}),
 				c: cell{1, 1},
 			},
-			want: empty(3, 3).init([][]bool{
+			want: from([][]bool{
 				{F, T, F},
 				{F, T, T},
 				{T, F, F},
@@ -160,14 +160,14 @@ func Test_evolveCell(t *testing.T) {
 		{
 			name: "any living cell with more than three alive neighbours dies, as if by overpopulation",
 			args: args{
-				b: empty(3, 3).init([][]bool{
+				b: from([][]bool{
 					{F, T, T},
 					{F, T, F},
 					{T, F, T},
 				}),
 				c: cell{1, 1},
 			},
-			want: empty(3, 3).init([][]bool{
+			want: from([][]bool{
 				{F, T, T},
 				{F, F, F},
 				{T, F, T},
@@ -176,14 +176,14 @@ func Test_evolveCell(t *testing.T) {
 		{
 			name: "any dead cell with exactly three alive neighbours becomes a living cell, as if by reproduction",
 			args: args{
-				b: empty(3, 3).init([][]bool{
+				b: from([][]bool{
 					{T, T, F},
 					{F, F, F},
 					{F, T, F},
 				}),
 				c: cell{1, 1},
 			},
-			want: empty(3, 3).init([][]bool{
+			want: from([][]bool{
 				{T, T, F},
 				{F, T, F},
 				{F, T, F},
@@ -266,6 +266,28 @@ func Test_neighbours(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.ElementsMatch(t, tt.want, neighbours(tt.args.origin, tt.args.rows, tt.args.cols))
 		})
+	}
+}
+
+func from(grid [][]bool) *Board {
+	cols := -1
+
+	if len(grid) == 0 {
+		panic("grid cannot be empty")
+	}
+
+	for _, r := range grid {
+		if cols > -1 && cols != len(r) {
+			panic("all rows must have the same length")
+		}
+
+		cols = len(r)
+	}
+
+	return &Board{
+		grid: grid,
+		rows: len(grid),
+		cols: cols,
 	}
 }
 

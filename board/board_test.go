@@ -237,7 +237,7 @@ func Test_neighbours(t *testing.T) {
 			want: []cell{{2, 0}, {2, 1}, {1, 1}, {0, 1}, {0, 0}},
 		},
 		{
-			name: "returns 8 neighbours when cell is in (1,1) of a 3x3 board",
+			name: "returns 8 neighbours when cell is in (1, 1) of a 3x3 board",
 			args: args{cell{1, 1}, 3, 3},
 			want: []cell{{0, 0}, {1, 0}, {2, 0}, {2, 1}, {2, 2}, {1, 2}, {0, 2}, {0, 1}},
 		},

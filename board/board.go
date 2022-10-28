@@ -6,8 +6,8 @@ import (
 
 type Board struct {
 	grid [][]bool
-	cols int
 	rows int
+	cols int
 }
 
 func empty(rows, cols int) *Board {
@@ -50,12 +50,8 @@ func (b *Board) evolveCell(origin cell) {
 	}
 
 	switch {
-	case aliveNeighbours < 2:
-		b.grid[row][col] = false
-	case (aliveNeighbours == 2 || aliveNeighbours == 3) && b.grid[row][col]:
+	case aliveNeighbours == 2 && b.grid[row][col]:
 		b.grid[row][col] = true
-	case aliveNeighbours > 3:
-		b.grid[row][col] = false
 	case aliveNeighbours == 3:
 		b.grid[row][col] = true
 	default:
@@ -87,8 +83,8 @@ type cell struct {
 
 func neighbours(origin cell, rows, cols int) []cell {
 	res := make([]cell, 0)
-	for row := -1; row <= 1; row++ {
-		for col := -1; col <= 1; col++ {
+	for row := -1; row < 2; row++ {
+		for col := -1; col < 2; col++ {
 			if row == 0 && col == 0 {
 				continue
 			}

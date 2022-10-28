@@ -13,8 +13,8 @@ const (
 )
 
 type args struct {
-	b *Board
-	c cell
+	board  *Board
+	target cell
 }
 
 type testCase struct {
@@ -23,85 +23,17 @@ type testCase struct {
 	want *Board
 }
 
-func TestBoard_evolveCell_underpopulation_zero(t *testing.T) {
-	want := empty(2, 2)
-
-	gen := func(row, col int) args {
-		board := empty(2, 2)
-		board.grid[row][col] = true
-
-		return args{b: board, c: cell{col: col, row: row}}
-	}
-
-	tests := []testCase{
-		{"underpopulation_zero_top_left", gen(0, 0), want},
-		{"underpopulation_zero_top_right", gen(0, 1), want},
-		{"underpopulation_zero_bottom_left", gen(1, 0), want},
-		{"underpopulation_zero_bottom_right", gen(1, 1), want},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.args.b.evolveCell(tt.args.c)
-			if !assert.ElementsMatch(t, tt.args.b.grid, tt.want.grid) {
-				t.Log("Got:")
-				t.Log(stringify(tt.args.b))
-				t.Log("Expected:")
-				t.Log(stringify(tt.want))
-				t.Fail()
-			}
-		})
-	}
-}
-
-func TestBoard_evolveCell_underpopulation_one(t *testing.T) {
-	want := func(alive cell) *Board {
-		board := empty(2, 2)
-		board.grid[alive.row][alive.col] = true
-
-		return board
-	}
-
-	gen := func(orig cell, other cell) args {
-		board := empty(2, 2)
-		board.grid[orig.row][orig.col] = true
-		board.grid[other.row][other.col] = true
-
-		return args{b: board, c: cell{col: orig.col, row: orig.row}}
-	}
-
-	tests := []testCase{
-		{"underpopulation_one_top_left", gen(cell{0, 0}, cell{0, 1}), want(cell{0, 1})},
-		{"underpopulation_one_top_right", gen(cell{0, 1}, cell{1, 0}), want(cell{1, 0})},
-		{"underpopulation_one_bottom_left", gen(cell{1, 0}, cell{0, 0}), want(cell{0, 0})},
-		{"underpopulation_one_bottom_right", gen(cell{1, 1}, cell{0, 0}), want(cell{0, 0})},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.args.b.evolveCell(tt.args.c)
-			if !assert.ElementsMatch(t, tt.args.b.grid, tt.want.grid) {
-				t.Log("Got:")
-				t.Log(stringify(tt.args.b))
-				t.Log("Expected:")
-				t.Log(stringify(tt.want))
-				t.Fail()
-			}
-		})
-	}
-}
-
 func Test_evolveCell(t *testing.T) {
 	tests := []testCase{
 		{
 			name: "any living cell with no alive neighbours dies, as if by underpopulation",
 			args: args{
-				b: from([][]bool{
+				board: from([][]bool{
 					{F, F, F},
 					{F, T, F},
 					{F, F, F},
 				}),
-				c: cell{1, 1},
+				target: cell{1, 1},
 			},
 			want: from([][]bool{
 				{F, F, F},
@@ -112,12 +44,12 @@ func Test_evolveCell(t *testing.T) {
 		{
 			name: "any living cell with one alive neighbour dies, as if by underpopulation",
 			args: args{
-				b: from([][]bool{
+				board: from([][]bool{
 					{F, F, T},
 					{F, T, F},
 					{F, F, F},
 				}),
-				c: cell{1, 1},
+				target: cell{1, 1},
 			},
 			want: from([][]bool{
 				{F, F, T},
@@ -128,12 +60,12 @@ func Test_evolveCell(t *testing.T) {
 		{
 			name: "any living cell with two alive neighbours lives on to the next generation",
 			args: args{
-				b: from([][]bool{
+				board: from([][]bool{
 					{F, T, F},
 					{F, T, F},
 					{T, F, F},
 				}),
-				c: cell{1, 1},
+				target: cell{1, 1},
 			},
 			want: from([][]bool{
 				{F, T, F},
@@ -144,12 +76,12 @@ func Test_evolveCell(t *testing.T) {
 		{
 			name: "any living cell with three alive neighbours lives on to the next generation",
 			args: args{
-				b: from([][]bool{
+				board: from([][]bool{
 					{F, T, F},
 					{F, T, T},
 					{T, F, F},
 				}),
-				c: cell{1, 1},
+				target: cell{1, 1},
 			},
 			want: from([][]bool{
 				{F, T, F},
@@ -160,12 +92,12 @@ func Test_evolveCell(t *testing.T) {
 		{
 			name: "any living cell with more than three alive neighbours dies, as if by overpopulation",
 			args: args{
-				b: from([][]bool{
+				board: from([][]bool{
 					{F, T, T},
 					{F, T, F},
 					{T, F, T},
 				}),
-				c: cell{1, 1},
+				target: cell{1, 1},
 			},
 			want: from([][]bool{
 				{F, T, T},
@@ -176,12 +108,12 @@ func Test_evolveCell(t *testing.T) {
 		{
 			name: "any dead cell with exactly three alive neighbours becomes a living cell, as if by reproduction",
 			args: args{
-				b: from([][]bool{
+				board: from([][]bool{
 					{T, T, F},
 					{F, F, F},
 					{F, T, F},
 				}),
-				c: cell{1, 1},
+				target: cell{1, 1},
 			},
 			want: from([][]bool{
 				{T, T, F},
@@ -192,11 +124,11 @@ func Test_evolveCell(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.args.b.evolveCell(tt.args.c)
-			if !assert.ElementsMatch(t, tt.args.b.grid, tt.want.grid) {
+			tt.args.board.evolveCell(tt.args.target)
+			if !assert.ElementsMatch(t, tt.args.board.grid, tt.want.grid) {
 				t.Log(tt.name)
 				t.Log("Got:")
-				t.Log("\n", stringify(tt.args.b))
+				t.Log("\n", stringify(tt.args.board))
 				t.Log("Expected:")
 				t.Log("\n", stringify(tt.want))
 				t.Fail()

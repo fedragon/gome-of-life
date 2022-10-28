@@ -9,6 +9,7 @@ import (
 	"github.com/fedragon/gome-of-life/board"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 const (
@@ -23,12 +24,20 @@ func init() {
 type Game struct {
 	board      *board.Board
 	generation int
+	paused     bool
 	pixels     []byte
 }
 
 func (g *Game) Update() error {
-	g.board.Evolve()
-	g.generation++
+	if !g.paused {
+		g.board.Evolve()
+		g.generation++
+
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		g.paused = !g.paused
+	}
 
 	return nil
 }
@@ -42,7 +51,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	screen.WritePixels(g.pixels)
 
-	ebitenutil.DebugPrint(screen, strconv.Itoa(g.generation))
+	ebitenutil.DebugPrintAt(screen, strconv.Itoa(g.generation), 10, 10)
+	ebitenutil.DebugPrintAt(screen, "Press SPACE to pause or resume", 60, 200)
 }
 
 func (g *Game) Layout(_, _ int) (int, int) {

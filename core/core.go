@@ -8,26 +8,26 @@ type Board struct {
 	state [][]bool
 }
 
-func NewBoard(rows, cols, maxAlive int) *Board {
-	b := make([][]bool, rows)
+func NewBoard(width, height, maxAlive int) *Board {
+	b := make([][]bool, height)
 
-	for x := 0; x < rows; x++ {
-		b[x] = make([]bool, cols)
+	for x := 0; x < height; x++ {
+		b[x] = make([]bool, width)
 	}
 
-	for k := 0; k < maxAlive; k++ {
-		x := rand.Intn(rows)
-		y := rand.Intn(cols)
+	for i := 0; i < maxAlive; i++ {
+		y := rand.Intn(height)
+		x := rand.Intn(width)
 
-		b[x][y] = true
+		b[y][x] = true
 	}
 
 	return &Board{state: b}
 }
 
 func (b *Board) Evolve() {
-	for x := 0; x < len(b.state); x++ {
-		for y := 0; y < len(b.state[x]); y++ {
+	for y := 0; y < len(b.state); y++ {
+		for x := 0; x < len(b.state[y]); x++ {
 			b.evolveCell(coord{x, y})
 		}
 	}
@@ -36,33 +36,36 @@ func (b *Board) Evolve() {
 func (b *Board) evolveCell(c coord) {
 	x, y := c.x, c.y
 	aliveNeighbours := 0
-	for _, n := range neighbours(c, len(b.state), len(b.state[x])) {
-		if b.state[n.x][n.y] {
+	for _, n := range neighbours(c, len(b.state), len(b.state[y])) {
+		if b.state[n.y][n.x] {
 			aliveNeighbours++
 		}
 	}
 
 	switch {
-	case b.state[x][y] && aliveNeighbours == 2:
-		b.state[x][y] = true
+	case b.state[y][x] && aliveNeighbours == 2:
+		b.state[y][x] = true
 	case aliveNeighbours == 3:
-		b.state[x][y] = true
+		b.state[y][x] = true
 	default:
-		b.state[x][y] = false
+		b.state[y][x] = false
 	}
 }
 
 // TakeSnapshot creates a snapshot of the board state on a pixel byte array where each pixel is represented by a 4-bytes RGBA point.
 func (b *Board) TakeSnapshot(pixels []byte) {
-	for x := 0; x < len(b.state); x++ {
-		for y := 0; y < len(b.state[x]); y++ {
+	for y := 0; y < len(b.state); y++ {
+		width := len(b.state[y])
+
+		for x := 0; x < width; x++ {
 			var v byte = 0
-			if b.state[x][y] {
+			if b.state[y][x] {
 				v = 0xff
 			}
 
-			for k := 0; k < 3; k++ {
-				pixels[4*x*y+k] = v
+			offset := y*width + x
+			for i := 0; i < 3; i++ {
+				pixels[offset*4+i] = v
 			}
 		}
 	}
@@ -89,7 +92,7 @@ func right(a coord) coord {
 	return coord{a.x + 1, a.y}
 }
 
-func neighbours(origin coord, rows int, cols int) []coord {
+func neighbours(origin coord, height, width int) []coord {
 	all := []coord{
 		up(left(origin)),
 		up(origin),
@@ -103,7 +106,7 @@ func neighbours(origin coord, rows int, cols int) []coord {
 
 	res := make([]coord, 0)
 	for _, r := range all {
-		if r.x >= 0 && r.x < rows && r.y >= 0 && r.y < cols {
+		if r.x >= 0 && r.x < width && r.y >= 0 && r.y < height {
 			res = append(res, r)
 		}
 	}

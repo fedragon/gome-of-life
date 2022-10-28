@@ -51,7 +51,7 @@ func (g *Game) Layout(_, _ int) (int, int) {
 
 func main() {
 	game := &Game{
-		board:      core.NewBoard(screenWidth, screenHeight, screenWidth*screenHeight/25),
+		board:      core.NewBoard(screenWidth, screenHeight, screenWidth*screenHeight/20),
 		generation: 1,
 	}
 

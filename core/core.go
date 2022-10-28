@@ -43,8 +43,12 @@ func (b *Board) evolveCell(c coord) {
 	}
 
 	switch {
-	case b.state[y][x] && aliveNeighbours == 2:
+	case aliveNeighbours < 2:
+		b.state[y][x] = false
+	case (aliveNeighbours == 2 || aliveNeighbours == 3) && b.state[y][x]:
 		b.state[y][x] = true
+	case aliveNeighbours > 3:
+		b.state[y][x] = false
 	case aliveNeighbours == 3:
 		b.state[y][x] = true
 	default:

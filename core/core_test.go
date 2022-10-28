@@ -13,7 +13,7 @@ const (
 
 type args struct {
 	b *Board
-	c coord
+	c cell
 }
 
 type testCase struct {
@@ -32,7 +32,7 @@ func TestBoard_evolveCell_underpopulation_zero(t *testing.T) {
 		board := deadBoard()
 		board.state[x][y] = true
 
-		return args{board, coord{x, y}}
+		return args{board, cell{x, y}}
 	}
 
 	tests := []testCase{
@@ -57,26 +57,26 @@ func TestBoard_evolveCell_underpopulation_zero(t *testing.T) {
 }
 
 func TestBoard_evolveCell_underpopulation_one(t *testing.T) {
-	want := func(alive coord) *Board {
+	want := func(alive cell) *Board {
 		board := deadBoard()
-		board.state[alive.x][alive.y] = true
+		board.state[alive.col][alive.row] = true
 
 		return board
 	}
 
-	gen := func(c coord, n coord) args {
+	gen := func(c cell, n cell) args {
 		board := deadBoard()
-		board.state[c.x][c.y] = true
-		board.state[n.x][n.y] = true
+		board.state[c.col][c.row] = true
+		board.state[n.col][n.row] = true
 
-		return args{board, coord{c.x, c.y}}
+		return args{board, cell{c.col, c.row}}
 	}
 
 	tests := []testCase{
-		{"underpopulation_one_top_left", gen(coord{0, 0}, coord{0, 1}), want(coord{0, 1})},
-		{"underpopulation_one_top_right", gen(coord{0, 1}, coord{1, 0}), want(coord{1, 0})},
-		{"underpopulation_one_bottom_left", gen(coord{1, 0}, coord{0, 0}), want(coord{0, 0})},
-		{"underpopulation_one_bottom_right", gen(coord{1, 1}, coord{0, 0}), want(coord{0, 0})},
+		{"underpopulation_one_top_left", gen(cell{0, 0}, cell{0, 1}), want(cell{0, 1})},
+		{"underpopulation_one_top_right", gen(cell{0, 1}, cell{1, 0}), want(cell{1, 0})},
+		{"underpopulation_one_bottom_left", gen(cell{1, 0}, cell{0, 0}), want(cell{0, 0})},
+		{"underpopulation_one_bottom_right", gen(cell{1, 1}, cell{0, 0}), want(cell{0, 0})},
 	}
 
 	for _, tt := range tests {
@@ -102,7 +102,7 @@ func Test_evolveCell(t *testing.T) {
 					{F, T, F},
 					{F, F, F},
 				}},
-				c: coord{1, 1},
+				c: cell{1, 1},
 			},
 			&Board{state: [][]bool{
 				{F, F, F},
@@ -117,7 +117,7 @@ func Test_evolveCell(t *testing.T) {
 					{F, T, F},
 					{F, F, F},
 				}},
-				c: coord{1, 1},
+				c: cell{1, 1},
 			},
 			&Board{state: [][]bool{
 				{F, F, T},
@@ -132,7 +132,7 @@ func Test_evolveCell(t *testing.T) {
 					{F, T, F},
 					{T, F, F},
 				}},
-				c: coord{1, 1},
+				c: cell{1, 1},
 			},
 			&Board{state: [][]bool{
 				{F, T, F},
@@ -147,7 +147,7 @@ func Test_evolveCell(t *testing.T) {
 					{F, T, T},
 					{T, F, F},
 				}},
-				c: coord{1, 1},
+				c: cell{1, 1},
 			},
 			&Board{state: [][]bool{
 				{F, T, F},
@@ -162,7 +162,7 @@ func Test_evolveCell(t *testing.T) {
 					{F, T, F},
 					{T, F, T},
 				}},
-				c: coord{1, 1},
+				c: cell{1, 1},
 			},
 			&Board{state: [][]bool{
 				{F, T, T},
@@ -177,7 +177,7 @@ func Test_evolveCell(t *testing.T) {
 					{F, F, F},
 					{F, T, F},
 				}},
-				c: coord{1, 1},
+				c: cell{1, 1},
 			},
 			&Board{state: [][]bool{
 				{T, T, F},
@@ -203,42 +203,42 @@ func Test_evolveCell(t *testing.T) {
 
 func Test_neighbours(t *testing.T) {
 	type args struct {
-		origin coord
+		origin cell
 		rows   int
 		cols   int
 	}
 	tests := []struct {
 		name string
 		args args
-		want []coord
+		want []cell
 	}{
 		{"returns 8 neighbours when cell is in the center of a 3x3 board",
-			args{coord{1, 1}, 3, 3},
-			[]coord{coord{0, 0}, coord{1, 0}, coord{2, 0}, coord{2, 1}, coord{2, 2}, coord{1, 2}, coord{0, 2}, coord{0, 1}}},
+			args{cell{1, 1}, 3, 3},
+			[]cell{cell{0, 0}, cell{1, 0}, cell{2, 0}, cell{2, 1}, cell{2, 2}, cell{1, 2}, cell{0, 2}, cell{0, 1}}},
 		{"returns 5 neighbours when cell is in the middle of the top row of a 3x3 board",
-			args{coord{0, 1}, 3, 3},
-			[]coord{coord{0, 0}, coord{1, 0}, coord{1, 1}, coord{1, 2}, coord{0, 2}}},
+			args{cell{0, 1}, 3, 3},
+			[]cell{cell{0, 0}, cell{1, 0}, cell{1, 1}, cell{1, 2}, cell{0, 2}}},
 		{"returns 5 neighbours when cell is in the middle of the bottom row of a 3x3 board",
-			args{coord{2, 1}, 3, 3},
-			[]coord{coord{1, 0}, coord{2, 0}, coord{2, 2}, coord{1, 2}, coord{1, 1}}},
+			args{cell{2, 1}, 3, 3},
+			[]cell{cell{1, 0}, cell{2, 0}, cell{2, 2}, cell{1, 2}, cell{1, 1}}},
 		{"returns 5 neighbours when cell is on the left of the middle row of a 3x3 board",
-			args{coord{1, 0}, 3, 3},
-			[]coord{coord{2, 0}, coord{2, 1}, coord{1, 1}, coord{0, 1}, coord{0, 0}}},
+			args{cell{1, 0}, 3, 3},
+			[]cell{cell{2, 0}, cell{2, 1}, cell{1, 1}, cell{0, 1}, cell{0, 0}}},
 		{"returns 5 neighbours when cell is on the right of the middle row of a 3x3 board",
-			args{coord{1, 2}, 3, 3},
-			[]coord{coord{0, 1}, coord{1, 1}, coord{2, 1}, coord{2, 2}, coord{0, 2}}},
+			args{cell{1, 2}, 3, 3},
+			[]cell{cell{0, 1}, cell{1, 1}, cell{2, 1}, cell{2, 2}, cell{0, 2}}},
 		{"returns 3 neighbours when cell is on the left of the top row of a 3x3 board",
-			args{coord{0, 0}, 3, 3},
-			[]coord{coord{1, 0}, coord{1, 1}, coord{0, 1}}},
+			args{cell{0, 0}, 3, 3},
+			[]cell{cell{1, 0}, cell{1, 1}, cell{0, 1}}},
 		{"returns 3 neighbours when cell is on the right of the top row of a 3x3 board",
-			args{coord{0, 2}, 3, 3},
-			[]coord{coord{0, 1}, coord{1, 1}, coord{1, 2}}},
+			args{cell{0, 2}, 3, 3},
+			[]cell{cell{0, 1}, cell{1, 1}, cell{1, 2}}},
 		{"returns 3 neighbours when cell is on the left of the bottom row of a 3x3 board",
-			args{coord{2, 0}, 3, 3},
-			[]coord{coord{2, 1}, coord{1, 1}, coord{1, 0}}},
+			args{cell{2, 0}, 3, 3},
+			[]cell{cell{2, 1}, cell{1, 1}, cell{1, 0}}},
 		{"returns 3 neighbours when cell is on the left of the bottom row of a 3x3 board",
-			args{coord{2, 2}, 3, 3},
-			[]coord{coord{1, 1}, coord{2, 1}, coord{1, 2}}},
+			args{cell{2, 2}, 3, 3},
+			[]cell{cell{1, 1}, cell{2, 1}, cell{1, 2}}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

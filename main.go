@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/fedragon/gome-of-life/core"
+	"github.com/fedragon/gome-of-life/board"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
@@ -21,7 +21,7 @@ func init() {
 }
 
 type Game struct {
-	board      *core.Board
+	board      *board.Board
 	generation int
 	pixels     []byte
 }
@@ -51,7 +51,7 @@ func (g *Game) Layout(_, _ int) (int, int) {
 
 func main() {
 	game := &Game{
-		board:      core.NewBoard(screenWidth, screenHeight, screenWidth*screenHeight/20),
+		board:      board.NewBoard(screenWidth, screenHeight, screenWidth*screenHeight/20),
 		generation: 1,
 	}
 
